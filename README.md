@@ -3,11 +3,11 @@ DataVeryLite is a lightweight *Persistence Framework*.
 
 # Superiority
 
-   Easy to use
-   No config
+      Easy to use
+      No config
 # NuGet
 
-   PM> Install-Package DataVeryLite
+      PM> Install-Package DataVeryLite
 # Example lite
 
       using System;
