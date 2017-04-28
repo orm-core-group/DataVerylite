@@ -1,0 +1,95 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ include file="ConfigurationAccessor.tt" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="Microsoft.CSharp" #>
+<#@ import namespace="System.Collections.Generic" #>
+using System;
+using DataVeryLite.Util;
+<#
+try{
+//read from app.config or web.config
+var config = new ConfigurationAccessor((IServiceProvider)this.Host);
+#>
+namespace <#=config.GetValueByCurrentProjectPropertyKey("DefaultNamespace")#>.Models
+{
+<#
+//is or not a webproject
+string BrowseURL = config.GetValueByStartUpProjectPropertyKey("WebApplication.BrowseURL");
+string CurrentLocalPath = config.GetValueByCurrentProjectPropertyKey("LocalPath");
+string StartUpLocalPath = config.GetValueByStartUpProjectPropertyKey("LocalPath");
+//this.WriteLine(LocalPath);
+if(string.IsNullOrEmpty(BrowseURL)){
+	config.CopyDirs(CurrentLocalPath+"Drivers",StartUpLocalPath+@"bin\Debug\Drivers");
+}else if(CurrentLocalPath!=StartUpLocalPath){
+	config.CopyDirs(CurrentLocalPath+"Drivers",StartUpLocalPath+@"Drivers");
+}
+Dictionary<string,string> providerNames=new Dictionary<string,string>();
+Dictionary<string,string> constrs=new Dictionary<string,string>();
+var en = config.StartUpProjectConnectionStrings.GetEnumerator();
+while(en.MoveNext())
+{
+	var cs = (ConnectionStringSettings)en.Current;
+	//this.WriteLine("{0}, {1}, {2}",cs.Name,cs.ProviderName,cs.ConnectionString);
+	if(cs.Name=="LocalSqlServer"||cs.Name=="LocalMySqlServer"||cs.Name=="OraAspNetConString")continue;
+	providerNames.Add(cs.ConnectionString,cs.ProviderName);
+	constrs.Add(cs.ConnectionString,cs.Name);
+}
+	  
+byte[] assemblyBuffer = System.IO.File.ReadAllBytes(CurrentLocalPath+@"Drivers\DataVeryLite.dll");
+var asm = System.Reflection.Assembly.Load(assemblyBuffer);
+dynamic t4Helper=asm.CreateInstance("DataVeryLite.Util.T4Helper");
+t4Helper.Init(providerNames,CurrentLocalPath);
+//get tables;
+foreach(var constr in t4Helper.SqlHelpers.Keys)
+{
+var dataBaseName=t4Helper.DataBaseNames[constr];
+#>
+ namespace <#=t4Helper.ToPascalCase(dataBaseName)#>
+  {
+    [DataVeryLite.DataBase(Name = "<#=dataBaseName#>",Key = "<#=constrs[constr]#>")]
+	public class <#=t4Helper.ToPascalCase(dataBaseName)#>:<#=asm.GetType("DataVeryLite.Core.ProviderManager").InvokeMember("GetEntityPool", System.Reflection.BindingFlags.InvokeMethod, null, null, new object[] {providerNames[constr]})#>
+	{
+		
+	}
+<#
+	try{
+	List<dynamic> tables = t4Helper.SqlHelpers[constr].GetTables();
+	foreach(var table in tables){
+	var idValue= t4Helper.SqlHelpers[constr].GetPrimaryKey(table.name);
+#>
+    [DataVeryLite.Table(Name = "<#=table.name#>",EntityPool = typeof(<#=t4Helper.ToPascalCase(dataBaseName)#>))]
+	public partial class <#=t4Helper.ToPascalCase(table.name)#> : <#=asm.GetType("DataVeryLite.Core.ProviderManager").InvokeMember("GetEntity", System.Reflection.BindingFlags.InvokeMethod, null, null, new object[] {providerNames[constr]})#>
+	{
+<#
+	//get columns;
+	List<dynamic> columns = t4Helper.SqlHelpers[constr].GetColumns(table.name);
+	foreach(var column in columns){
+#>
+<#
+	if(column.name==idValue){
+#>
+		[DataVeryLite.Column(Name = "<#=column.name#>",IsPrimaryKey = true)]
+<#
+	}else{
+#>
+		[DataVeryLite.Column(Name = "<#=column.name#>")]
+<#	
+	}
+#>
+		public <#=t4Helper.SqlHelpers[constr].GetColumnType(table.name,column.name)#> <#=t4Helper.ToPascalCase(column.name)#> { get; set; }
+<#}#>
+	}
+<#}
+}catch(Exception ex){
+	this.WriteLine(ex.ToString());
+}
+#>
+  }
+<#}
+	}catch(Exception ex){
+		this.WriteLine(ex.ToString());
+	}
+#>
+}

@@ -1,0 +1,267 @@
+﻿
+this.Host.ResolvePath() :C:\DataVeryLite\DataVeryLite.Test\Models\Model.tt
+this.Host.TemplateFile :C:\DataVeryLite\DataVeryLite.Test\Models\ConfigurationAccessorUsageExample.tt
+AppDomain.CurrentDomain.BaseDirectory :C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\
+
+
+--------------------------------------------------------------
+Solution
+--------------------------------------------------------------
+ExtenderCATID = {A2392464-7C22-11d3-BDCA-00C04F688E50}
+ProjectDependencies = 
+Extender = Invalid number of parameters. (Exception from HRESULT: 0x8002000E (DISP_E_BADPARAMCOUNT))
+ActiveConfig = Debug|Mixed Platforms
+Path = C:\DataVeryLite\DataVeryLite.sln
+ExtenderNames = System.String[]
+Description = 
+Name = DataVeryLite
+StartupProject = DataVeryLite.Test
+
+--------------------------------------------------------------
+Projects
+--------------------------------------------------------------
+DataVeryLite = C:\DataVeryLite\DataVeryLite\DataVeryLite.csproj
+
+--------------------------------------------------------------
+DataVeryLite
+--------------------------------------------------------------
+TargetFrameworkMoniker = .NETFramework,Version=v4.0
+ComVisible = False
+EnableSecurityDebugging = True
+OptionCompare = 0
+StartupObject = 
+ManifestCertificateThumbprint = 
+Trademark = 
+Title = DataVeryLite
+AssemblyOriginatorKeyFileType = 1
+FileName = DataVeryLite.csproj
+WebServer = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyMode = 0
+AssemblyKeyContainerName = 
+ProjectType = 0
+ReferencePath = 
+PreBuildEvent = 
+Copyright = Copyright © Robert.Shu 2013
+ApplicationIcon = 
+ExcludedPermissions = 
+RunPostBuildEvent = 1
+DefaultTargetSchema = 1
+RootNamespace = DataVeryLite
+ManifestTimestampUrl = 
+ManifestKeyFile = 
+DebugSecurityZoneURL = 
+Product = DataVeryLite
+PostBuildEvent = 
+OptionStrict = 0
+DefaultHTMLPageLayout = 1
+DelaySign = False
+OutputType = 2
+ReSharperCSharpProjectProperties.SolutionWideInspections = On
+NeutralResourcesLanguage = 
+OptionExplicit = 1
+OutputFileName = DataVeryLite.dll
+ServerExtensionsVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyGuid = 2c0d65f4-9ebd-4601-964a-881853b8f789
+GenerateManifests = False
+AssemblyVersion = 0.0.0.1
+Win32ResourceFile = 
+Description = DataVeryLite is a lightweight *Persistence Framework*.
+URL = file:///C:\DataVeryLite\DataVeryLite\
+DefaultClientScript = 0
+TargetFramework = 262144
+SignManifests = False
+OfflineURL = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+WebServerVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+Publish = System.__ComObject
+AssemblyType = 0
+FullPath = C:\DataVeryLite\DataVeryLite\
+WebAccessMethod = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyKeyProviderName = 
+TypeComplianceDiagnostics = False
+Company = Dandelion
+ActiveFileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyFile = 
+ApplicationManifest = DefaultManifest
+AssemblyFileVersion = 0.0.0.1
+AspnetVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+FileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyName = DataVeryLite
+LocalPath = C:\DataVeryLite\DataVeryLite\
+DefaultNamespace = DataVeryLite
+LinkRepair = False
+TargetZone = 
+SignAssembly = False
+DataVeryLite.Test = C:\DataVeryLite\DataVeryLite.Test\DataVeryLite.Test.csproj
+
+--------------------------------------------------------------
+DataVeryLite.Test
+--------------------------------------------------------------
+TargetFrameworkMoniker = .NETFramework,Version=v4.0
+ComVisible = False
+EnableSecurityDebugging = True
+OptionCompare = 0
+StartupObject = 
+ManifestCertificateThumbprint = 
+Trademark = 
+Title = DataVeryLite.Test
+AssemblyOriginatorKeyFileType = 1
+FileName = DataVeryLite.Test.csproj
+WebServer = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyMode = 0
+AssemblyKeyContainerName = 
+ProjectType = 0
+ReferencePath = 
+PreBuildEvent = 
+Copyright = Copyright © Robert.Shu 2013
+ApplicationIcon = 
+ExcludedPermissions = 
+RunPostBuildEvent = 1
+DefaultTargetSchema = 1
+RootNamespace = DataVeryLite.Test
+ManifestTimestampUrl = 
+ManifestKeyFile = 
+DebugSecurityZoneURL = 
+Product = DataVeryLite.Test
+PostBuildEvent = 
+OptionStrict = 0
+DefaultHTMLPageLayout = 1
+DelaySign = False
+OutputType = 1
+ReSharperCSharpProjectProperties.SolutionWideInspections = On
+NeutralResourcesLanguage = 
+OptionExplicit = 1
+OutputFileName = DataVeryLite.Test.exe
+ServerExtensionsVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyGuid = 2b2ca46f-3980-44ea-ae69-7da6e100fdd9
+GenerateManifests = False
+AssemblyVersion = 1.0.0.0
+Win32ResourceFile = 
+Description = 
+URL = file:///C:\DataVeryLite\DataVeryLite.Test\
+DefaultClientScript = 0
+TargetFramework = 262144
+SignManifests = False
+OfflineURL = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+WebServerVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+Publish = System.__ComObject
+AssemblyType = 0
+FullPath = C:\DataVeryLite\DataVeryLite.Test\
+WebAccessMethod = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyKeyProviderName = 
+TypeComplianceDiagnostics = False
+Company = Dandelion
+ActiveFileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyFile = 
+ApplicationManifest = DefaultManifest
+AssemblyFileVersion = 1.0.0.0
+AspnetVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+FileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyName = DataVeryLite.Test
+LocalPath = C:\DataVeryLite\DataVeryLite.Test\
+DefaultNamespace = DataVeryLite.Test
+LinkRepair = False
+TargetZone = 
+SignAssembly = False
+
+--------------------------------------------------------------
+ConfigurationAccessor.Project
+--------------------------------------------------------------
+Project.FileName = C:\DataVeryLite\DataVeryLite.Test\DataVeryLite.Test.csproj
+Project.FullName = C:\DataVeryLite\DataVeryLite.Test\DataVeryLite.Test.csproj
+Project.Name = DataVeryLite.Test
+WebApplication.BrowseURL
+
+--------------------------------------------------------------
+ConfigurationAccessor.Properties
+--------------------------------------------------------------
+TargetFrameworkMoniker = .NETFramework,Version=v4.0
+ComVisible = False
+EnableSecurityDebugging = True
+OptionCompare = 0
+StartupObject = 
+ManifestCertificateThumbprint = 
+Trademark = 
+Title = DataVeryLite.Test
+AssemblyOriginatorKeyFileType = 1
+FileName = DataVeryLite.Test.csproj
+WebServer = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyMode = 0
+AssemblyKeyContainerName = 
+ProjectType = 0
+ReferencePath = 
+PreBuildEvent = 
+Copyright = Copyright © Robert.Shu 2013
+ApplicationIcon = 
+ExcludedPermissions = 
+RunPostBuildEvent = 1
+DefaultTargetSchema = 1
+RootNamespace = DataVeryLite.Test
+ManifestTimestampUrl = 
+ManifestKeyFile = 
+DebugSecurityZoneURL = 
+Product = DataVeryLite.Test
+PostBuildEvent = 
+OptionStrict = 0
+DefaultHTMLPageLayout = 1
+DelaySign = False
+OutputType = 1
+ReSharperCSharpProjectProperties.SolutionWideInspections = On
+NeutralResourcesLanguage = 
+OptionExplicit = 1
+OutputFileName = DataVeryLite.Test.exe
+ServerExtensionsVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyGuid = 2b2ca46f-3980-44ea-ae69-7da6e100fdd9
+GenerateManifests = False
+AssemblyVersion = 1.0.0.0
+Win32ResourceFile = 
+Description = 
+URL = file:///C:\DataVeryLite\DataVeryLite.Test\
+DefaultClientScript = 0
+TargetFramework = 262144
+SignManifests = False
+OfflineURL = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+WebServerVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+Publish = System.__ComObject
+AssemblyType = 0
+FullPath = C:\DataVeryLite\DataVeryLite.Test\
+WebAccessMethod = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyKeyProviderName = 
+TypeComplianceDiagnostics = False
+Company = Dandelion
+ActiveFileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyOriginatorKeyFile = 
+ApplicationManifest = DefaultManifest
+AssemblyFileVersion = 1.0.0.0
+AspnetVersion = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+FileSharePath = Exception occurred. (Exception from HRESULT: 0x80020009 (DISP_E_EXCEPTION))
+AssemblyName = DataVeryLite.Test
+LocalPath = C:\DataVeryLite\DataVeryLite.Test\
+DefaultNamespace = DataVeryLite.Test
+LinkRepair = False
+TargetZone = 
+SignAssembly = False
+
+--------------------------------------------------------------
+ConfigurationAccessor.Configuration
+--------------------------------------------------------------
+
+--------------------------------------------------------------
+ConfigurationAccessor.AppSettings
+--------------------------------------------------------------
+Enumerator access
+
+
+--------------------------------------------------------------
+ConfigurationAccessor.ConnectionStrings
+--------------------------------------------------------------
+Enumerator access
+
+LocalSqlServer, System.Data.SqlClient, data source=.\SQLEXPRESS;Integrated Security=SSPI;AttachDBFilename=|DataDirectory|aspnetdb.mdf;User Instance=true
+LocalMySqlServer, , 
+OraAspNetConString, ,  
+sqlite, sqlite, Data Source=dbs\Localite.db;Version=3;
+access, access, Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\DataVeryLite\DataVeryLite.Test\bin\Debug\dbs\LocalAccess.mdb
+mysql, mysql, server = localhost; user id = root; password = v*elocIpEd; database = datawarehouse;
+postgresql, postgresql, Server=localhost;User Id=admin;Password=admin;Database=MyDb;
+db2, db2, Database=SAMPLE;User ID=db2admin;Server=192.168.40.128;password=VBshuqizhao12
+oracle, oracle, Data Source=XE;User Id=HR;Password=VBshuqizhao12;

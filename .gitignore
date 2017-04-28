@@ -1,0 +1,7 @@
+*.dll
+*.nupkg
+bin/
+obj/
+.vs/
+packages/
+*.user

@@ -1,0 +1,34 @@
+﻿<Properties StartupConfiguration="{9A1999D6-6E2C-46F8-AD2F-41DBE7980682}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="DataVeryLite/Core/IntrospectionManager.cs">
+    <Files>
+      <File FileName="DataVeryLite/Core/Entity.cs" Line="558" Column="43" />
+      <File FileName="DataVeryLite/Core/IntrospectionManager.cs" Line="428" Column="18" />
+      <File FileName="DataVeryLite/Util/SqlHelper.cs" Line="586" Column="10" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="DataVeryLite" expanded="True">
+            <Node name="DataVeryLite" expanded="True">
+              <Node name="Aop" expanded="True" />
+              <Node name="Core" expanded="True">
+                <Node name="IntrospectionManager.cs" selected="True" />
+              </Node>
+              <Node name="Util" expanded="True" />
+            </Node>
+            <Node name="DataVeryLite.Test" expanded="True">
+              <Node name="Properties" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.DataVeryLite.Test PreferredExecutionTarget="MonoDevelop.Default" />
+  <MultiItemStartupConfigurations />
+</Properties>

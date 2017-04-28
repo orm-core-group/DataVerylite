@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0AD6E40A-F35F-46F5-A9F4-79A4C9D57900}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DataVeryLite</RootNamespace>
+    <AssemblyName>DataVeryLite</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\DataVeryLite.Test\Drivers\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aop\AopAttribute.cs" />
+    <Compile Include="Aop\AopProxy.cs" />
+    <Compile Include="Aop\AopRealProxy.cs" />
+    <Compile Include="Attributes\ColumnAttribute.cs" />
+    <Compile Include="Attributes\DataBaseAttribute.cs" />
+    <Compile Include="Attributes\TableAttribute.cs" />
+    <Compile Include="Attributes\ViewAttribute.cs" />
+    <Compile Include="Bys\ByAll.cs" />
+    <Compile Include="Bys\ByBetween.cs" />
+    <Compile Include="Bys\ByPage.cs" />
+    <Compile Include="Bys\ByTop.cs" />
+    <Compile Include="Bys\Condition.cs" />
+    <Compile Include="Bys\Partly.cs" />
+    <Compile Include="Core\Configure.cs" />
+    <Compile Include="Core\Delegates.cs" />
+    <Compile Include="Core\Dynamic.cs" />
+    <Compile Include="Exceptions\SqlHelperCanNotExists.cs" />
+    <Compile Include="Providers\BasicConnectionStringSettingsProvider.cs" />
+    <Compile Include="Core\By.cs" />
+    <Compile Include="Bys\ByAttach.cs" />
+    <Compile Include="Bys\ById.cs" />
+    <Compile Include="Bys\BySql.cs" />
+    <Compile Include="Core\DataBaseNames.cs" />
+    <Compile Include="Core\Entity.cs" />
+    <Compile Include="Core\EntityPool.cs" />
+    <Compile Include="Core\ConnectionStringSettingsProvider.cs" />
+    <Compile Include="Core\IntrospectionManager.cs" />
+    <Compile Include="Core\IProvider.cs" />
+    <Compile Include="Core\ProviderManager.cs" />
+    <Compile Include="Entities\Db2Entity.cs" />
+    <Compile Include="Entities\OracleEntity.cs" />
+    <Compile Include="Entities\PostgreSqlEntity.cs" />
+    <Compile Include="EntityPools\Db2EntityPool.cs" />
+    <Compile Include="EntityPools\OracleEntityPool.cs" />
+    <Compile Include="EntityPools\PostgreSqlEntityPool.cs" />
+    <Compile Include="Exceptions\ClassNotHaveDataBaseAttributeException.cs" />
+    <Compile Include="Exceptions\ConnectionStringKeyNotExists.cs" />
+    <Compile Include="Exceptions\ConnectionStringProviderNameNotExists.cs" />
+    <Compile Include="Exceptions\DataBaseAttributeKeyNotExists.cs" />
+    <Compile Include="Exceptions\ClassNotHaveTableAttributeException.cs" />
+    <Compile Include="Exceptions\NotSupportThisByException.cs" />
+    <Compile Include="Exceptions\TableAttributeNotHaveEntityPoolException.cs" />
+    <Compile Include="Exceptions\TableNotHavePrimaryKeyException.cs" />
+    <Compile Include="Providers\Db2Provider.cs" />
+    <Compile Include="Providers\OracleProvider.cs" />
+    <Compile Include="Providers\PostgreSqlProvider.cs" />
+    <Compile Include="ReadMe.cs" />
+    <Compile Include="Entities\AccessEntity.cs" />
+    <Compile Include="Entities\MySqlEntity.cs" />
+    <Compile Include="Entities\SqliteEntity.cs" />
+    <Compile Include="Entities\SqlServerEntity.cs" />
+    <Compile Include="EntityPools\AccessEntityPool.cs" />
+    <Compile Include="EntityPools\MySqlEntityPool.cs" />
+    <Compile Include="EntityPools\SqliteEntityPool.cs" />
+    <Compile Include="EntityPools\SqlServerEntityPool.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\AccessProvider.cs" />
+    <Compile Include="Providers\MySqlProvider.cs" />
+    <Compile Include="Providers\SqliteProvider.cs" />
+    <Compile Include="Providers\SqlServerProvider.cs" />
+    <Compile Include="Util\Extern.cs" />
+    <Compile Include="Util\LogHelper.cs" />
+    <Compile Include="Util\ModelHelper.cs" />
+    <Compile Include="Util\SqlHelper.cs" />
+    <Compile Include="Util\T4Helper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

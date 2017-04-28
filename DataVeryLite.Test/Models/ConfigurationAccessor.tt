@@ -1,0 +1,267 @@
+﻿<#@ assembly name="EnvDTE" #>
+<#@ assembly name="System.Configuration" #>
+<#@ import namespace="System.Configuration" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#+
+/// <summary>
+/// Provides strongly typed access to the hosting EnvDTE.Project and app.config/web.config 
+/// configuration file, if present.
+/// 
+/// Typical usage from T4 template:
+/// <code>ConfigurationAccessor config = new ConfigurationAccessor((IServiceProvider)this.Host);</code>
+/// TODO: determine behaviour of ProjectItem.FileNames when referred to a linked file.
+/// 
+public class ConfigurationAccessor
+{
+	
+	/// <summary>
+	/// Typical usage from T4 template:
+	/// <code>ConfigurationAccessor config = new ConfigurationAccessor((IServiceProvider)this.Host);</code>
+	/// </summary>
+	public ConfigurationAccessor(IServiceProvider host)
+	{
+		// Get the instance of Visual Studio that is hosting the calling file
+		EnvDTE.DTE env = (EnvDTE.DTE)host.GetService(typeof(EnvDTE.DTE));
+		
+		// Gets an array of currently selected projects. Since you are either in this file saving it or
+		// right-clicking the item in solution explorer to invoke the context menu it stands to reason
+		// that there is 1 ActiveSolutionProject and that it is the parent of this file....
+		_project = (EnvDTE.Project)((Array)env.ActiveSolutionProjects).GetValue(0);
+		_solution = env.Solution;
+		string configurationFilename=null;	
+		
+		// examine each project item's filename looking for app.config or web.config
+		foreach (EnvDTE.ProjectItem item in _project.ProjectItems)
+		{
+			if (Regex.IsMatch(item.Name,"(app|web).config",RegexOptions.IgnoreCase))
+			{
+				// TODO: try this with linked files. is the filename pointing to the source?
+				configurationFilename=item.get_FileNames(0);
+				break;
+			}
+		}
+
+		if(!string.IsNullOrEmpty(configurationFilename))
+		{
+			// found it, map it and expose salient members as properties
+			ExeConfigurationFileMap configFile = null;
+			configFile = new ExeConfigurationFileMap();
+			configFile.ExeConfigFilename=configurationFilename;
+			_configuration = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+ 		}
+		var startUpProjectName="";
+		var en1 = env.Solution.Properties.GetEnumerator();
+		while(en1.MoveNext())
+		{
+			var property = (EnvDTE.Property)en1.Current;
+			object propertyValue = null;
+			try
+			{
+				propertyValue = property.Value;
+				if(property.Name=="StartupProject"){
+					startUpProjectName=property.Value.ToString();
+				}
+			}
+			catch (Exception ex)
+			{
+				propertyValue = ex.Message;
+			}
+		}
+		string startUpConfigurationFilename=null;
+		foreach (EnvDTE.Project proj in env.Solution.Projects)
+		{			
+			var en = proj.Properties.GetEnumerator();
+			if(proj.Name==startUpProjectName){
+				_startUpProject=proj;
+				foreach (EnvDTE.ProjectItem item in _startUpProject.ProjectItems)
+				{
+					if (Regex.IsMatch(item.Name,"(app|web).config",RegexOptions.IgnoreCase))
+					{
+						// TODO: try this with linked files. is the filename pointing to the source?
+						startUpConfigurationFilename=item.get_FileNames(0);
+						break;
+					}
+				}
+				if(!string.IsNullOrEmpty(startUpConfigurationFilename))
+				{
+					// found it, map it and expose salient members as properties
+					ExeConfigurationFileMap configFile = null;
+					configFile = new ExeConfigurationFileMap();
+					configFile.ExeConfigFilename=startUpConfigurationFilename;
+					_startUpConfiguration = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+ 				}	
+			}
+		}
+		if(string.IsNullOrEmpty(startUpConfigurationFilename)){
+			throw new Exception("Your startup project don't have a web/App config");
+		}
+	}
+	
+	private EnvDTE.Project _project;
+	private EnvDTE.Project _startUpProject;
+	private Configuration _configuration;
+	private Configuration _startUpConfiguration;
+	private EnvDTE.Solution _solution;
+
+	
+	/// <summary>
+	/// Provides access to the host project.
+	/// </summary>
+	/// <remarks>see http://msdn.microsoft.com/en-us/library/envdte.project.aspx</remarks>
+	public EnvDTE.Project CurrentProject
+	{
+		get { return _project; }
+	}
+
+	public EnvDTE.Project StartUpProject
+	{
+		get { return _startUpProject; }
+	}
+
+	public EnvDTE.Solution Solution
+	{
+		get { return _solution; }
+	}
+
+	/// <summary>
+	/// Convenience getter for Project.Properties.
+	/// Examples:
+	/// <code>string thisAssemblyName = config.Properties.Item("AssemblyName").Value.ToString();</code>
+	/// <code>string thisAssemblyName = config.Properties.Item("AssemblyName").Value.ToString();</code>
+	/// </summary>
+	/// <remarks>see http://msdn.microsoft.com/en-us/library/envdte.project_properties.aspx</remarks>
+	public EnvDTE.Properties CurrentProjectProperties 
+	{
+		get { return _project.Properties;}
+	}
+
+	public EnvDTE.Properties StartUpProjectProperties 
+	{
+		get { return _startUpProject.Properties;}
+	}
+	
+	/// <summary>
+	/// Provides access to the application/web configuration file.
+	/// </summary>
+	/// <remarks>see http://msdn.microsoft.com/en-us/library/system.configuration.configuration.aspx</remarks>
+	public Configuration CurrentProjectConfiguration
+	{
+		get { return _configuration; }
+	}	
+
+	public Configuration StartUpConfiguration
+	{
+		get { return _startUpConfiguration; }
+	}	
+	
+	/// <summary>
+	/// Provides access to the appSettings section of the configuration file.
+	/// Behavior differs from typical AppSettings usage in that the indexed
+	/// item's .Value must be explicitly addressed.
+	/// <code>string setting = config.AppSettings["MyAppSetting"].Value;</code>
+	/// </summary>
+	/// <remarks>see http://msdn.microsoft.com/en-us/library/system.configuration.configuration.appsettings.aspx</remarks>
+	public  KeyValueConfigurationCollection CurrentProjectAppSettings
+	{
+		get { return _configuration.AppSettings.Settings;}
+	}
+
+	public  KeyValueConfigurationCollection StartUpProjectAppSettings
+	{
+		get { return _startUpConfiguration.AppSettings.Settings;}
+	}
+	
+	/// <summary>
+	/// Provides access to the connectionStrings section of the configuration file.
+	/// Behavior is as expected; items are accessed by string key or integer index.
+	/// <code>string northwindProvider = config.ConnectionStrings["northwind"].ProviderName;</code>
+	/// </summary>
+	/// <remarks>see http://msdn.microsoft.com/en-us/library/system.configuration.configuration.connectionstrings.aspx</remarks>
+	public  ConnectionStringSettingsCollection CurrentProjectConnectionStrings
+	{
+		get { 
+		try{
+			return _configuration.ConnectionStrings.ConnectionStrings;
+			}catch(Exception ex){
+				throw new Exception("Your current project don't have a web/App config");
+			}
+		}
+	}
+	public  ConnectionStringSettingsCollection StartUpProjectConnectionStrings
+	{
+		get { 
+		    try{
+			return _startUpConfiguration.ConnectionStrings.ConnectionStrings;
+			}catch(Exception ex){
+				throw new Exception("Your startup project don't have a web/App config");
+			}
+		}
+	}
+
+	public string GetValueByCurrentProjectPropertyKey(string key){
+		var en = _project.Properties.GetEnumerator();
+		while(en.MoveNext())
+		{
+			var property = (EnvDTE.Property)en.Current;
+			object propertyValue = null;
+			try
+			{
+				propertyValue = property.Value;
+			}
+			catch (Exception ex)
+			{
+				propertyValue = ex.Message;
+			}
+			if(property.Name == key){
+				return propertyValue.ToString();
+			}
+		}
+		return null;
+	}
+	public string GetValueByStartUpProjectPropertyKey(string key){
+		var en = _startUpProject.Properties.GetEnumerator();
+		while(en.MoveNext())
+		{
+			var property = (EnvDTE.Property)en.Current;
+			object propertyValue = null;
+			try
+			{
+				propertyValue = property.Value;
+			}
+			catch (Exception ex)
+			{
+				propertyValue = ex.Message;
+			}
+			if(property.Name == key){
+				return propertyValue.ToString();
+			}
+		}
+		return null;
+	}
+	public void CopyDirs(string sourceFilePath, string destFilePath)
+    {
+        if (System.IO.Directory.Exists(sourceFilePath))
+        {
+            if (destFilePath[destFilePath.Length - 1] != System.IO.Path.DirectorySeparatorChar)
+                destFilePath += System.IO.Path.DirectorySeparatorChar;
+
+            if (!System.IO.Directory.Exists(destFilePath))
+                System.IO.Directory.CreateDirectory(destFilePath);
+
+            string[] fileList = System.IO.Directory.GetFileSystemEntries(sourceFilePath);
+
+            foreach (string file in fileList)
+            {
+                if (System.IO.Directory.Exists(file))
+                    CopyDirs(file, destFilePath + System.IO.Path.GetFileName(file));
+                else
+                    System.IO.File.Copy(file, destFilePath + System.IO.Path.GetFileName(file), true);
+            }
+        }
+        else
+        {
+            throw new Exception("Directory don't exists!" + sourceFilePath);
+        }
+    }
+}
+#>
