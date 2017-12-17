@@ -39,7 +39,7 @@ namespace DataVeryLite.Core
             }
         }
 
-        public string Key { get; set; }
+        public string Key { get; internal set; }
 
         public  SqlHelper NativeSql
         {
@@ -85,13 +85,43 @@ namespace DataVeryLite.Core
                 return NativeSql.ExecuteDynamic(trans, sql);
             }
         }
+
+        /// <summary>
+        /// Easy to access database,you can get any data that you want.
+        /// </summary>
+        /// <param name="cmdText">Any sql text</param>
+        /// <param name="trans">Transaction</param>
+        /// <returns>Any data list</returns>
+        public List<dynamic> List(string cmdText, DbTransaction trans, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms)
+        {
+            if (trans == null)
+            {
+                return NativeSql.ExecuteDynamic(cmdText, cmdType, cmdParms);
+            }
+            else
+            {
+                return NativeSql.ExecuteDynamic(trans, cmdText, cmdType, cmdParms);
+            }
+        }
+        /// <summary>
+        /// Easy to access database,you can get any data that you want.
+        /// </summary>
+        /// <param name="cmdText">Any sql text</param>
+        /// <param name="trans">Transaction</param>
+        /// <returns>Any data list</returns>
+        public List<dynamic> List(string cmdText,CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms)
+        {
+            return NativeSql.ExecuteDynamic(cmdText, cmdType, cmdParms);
+        }
         /// <summary>
         ///  Load data  list
         /// </summary>
         /// <typeparam name="T">Entity</typeparam>
         /// <param name="by">Sql,All,Top,Page,Between</param>
         /// <returns></returns>
-        public List<T> List<T>(By by) where T : Entity, new()
+        public List<T> List<T>(By by) where T :  new()
         {
             #region BySql
             if (by is BySql)
@@ -724,5 +754,114 @@ namespace DataVeryLite.Core
     public enum TransactionStatus
     {
         Normal=0,Running
+    }
+
+    public abstract class EntityPool<T> : EntityPool where T : EntityPool,new ()
+    {
+        static EntityPool()
+        {
+            var entityPoolType = typeof(T);
+            var attributes = entityPoolType.GetCustomAttributes(false).Where(x => x is DataBaseAttribute);
+            if (attributes.Any())
+            {
+                var dBAttribute = (DataBaseAttribute)attributes.FirstOrDefault();
+                _instance = new T();
+                _instance.Key = dBAttribute.Key;
+            }
+            else
+            {
+                throw new ClassNotHaveDataBaseAttributeException(entityPoolType.Name);
+            }
+        }
+
+        private static T _instance = null;
+        public static T Instance
+        {
+            get { return _instance; }
+        }
+
+        public List<X> Query<X>(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms) where X : new()
+        {
+            return List<X>(By.Sql(cmdText, tran, cmdType));
+        }
+
+        public List<X> Query<X>(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms) where X : new()
+        {
+            return List<X>(By.Sql(cmdText, cmdType));
+        }
+
+        public X QueryFirstOrDefault<X>(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms) where X : Entity, new()
+        {
+            return Query<X>(cmdText, tran, cmdType, cmdParms).FirstOrDefault();
+        }
+
+        public X QueryFirstOrDefault<X>(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms) where X :  new()
+        {
+            return Query<X>(cmdText, cmdType, cmdParms).FirstOrDefault();
+        }
+
+        public List<dynamic> Query(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms)
+        {
+            return List(cmdText, tran, cmdType, cmdParms);
+        }
+
+        public List<dynamic> Query(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms)
+        {
+            return List(cmdText, cmdType, cmdParms);
+        }
+
+        public dynamic QueryFirstOrDefault(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms)
+        {
+            return Query(cmdText, tran, cmdType, cmdParms).FirstOrDefault();
+        }
+
+        public dynamic QueryFirstOrDefault(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms)
+        {
+            return Query(cmdText, cmdType, cmdParms).FirstOrDefault();
+        }
+
+        public X ExecuteScalar<X>(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms) where X :new()
+        {
+            object result;
+            if (tran != null)
+            {
+                 result = NativeSql.ExecuteScalar(tran, cmdText, cmdType, cmdParms);
+            }
+            else
+            {
+                 result = NativeSql.ExecuteScalar(cmdText, cmdType, cmdParms);
+            }
+            
+            
+            return (X)Convert.ChangeType(result, typeof(X));
+        }
+
+        public X ExecuteScalar<X>(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms) where X : new()
+        {
+            return ExecuteScalar<X>(cmdText, null, cmdType, cmdParms);
+        }
+
+        public int ExecuteNonQuery(string cmdText, DbTransaction tran, CommandType cmdType = CommandType.Text,
+            params DbParameter[] cmdParms)
+        {
+            if (tran != null)
+            {
+               return NativeSql.ExecuteNonQuery(tran, cmdText, cmdType, cmdParms);
+            }
+            else
+            {
+                return NativeSql.ExecuteNonQuery(cmdText, cmdType, cmdParms);
+            }
+        }
+
+        public int ExecuteNonQuery(string cmdText, CommandType cmdType = CommandType.Text, params DbParameter[] cmdParms)
+        {
+            return ExecuteNonQuery(cmdText, null, cmdType, cmdParms);
+        }
     }
 }

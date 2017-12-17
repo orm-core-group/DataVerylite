@@ -18,6 +18,12 @@ namespace DataVeryLite.NTest
         public static readonly int Count = 100*1;
     }
 
+    [DataVeryLite.DataBase(Key = "sqlite1")]
+    public class DandelionNew : DataVeryLite.Core.EntityPool<DandelionNew>
+    {
+
+    }
+
     [DataVeryLite.Table(Name = "Work2",EnableSync = true)]
     public partial class Work : DataVeryLite.Core.Entity
     {

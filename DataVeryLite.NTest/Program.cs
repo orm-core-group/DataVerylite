@@ -53,6 +53,17 @@ namespace DataVeryLite.NTest
 
             var lu = new LocalUser();
             lu.Load(By.Id(1));
+
+            var list = DandelionNew.Instance.Query<Person>("select * from Person");
+            foreach (var person in list)
+            {
+                Console.WriteLine(person.name1);
+            }
+            var oj = DandelionNew.Instance.QueryFirstOrDefault("select * from Person");
+            Console.WriteLine(oj.Name);
+
+            var count = DandelionNew.Instance.ExecuteScalar<int>("select count(1) from Person");
+            Console.WriteLine(count);
         }
     }
 
