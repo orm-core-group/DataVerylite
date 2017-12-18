@@ -385,6 +385,16 @@ namespace DataVeryLite.Core
             return ColumnNames[typeName];
         }
 
+        public static void SetColumns(string typeName,Dictionary<string,string> info)
+        {
+            ColumnNames[typeName] = info;
+        }
+
+        public static bool IsExistsColumnName(string typeName)
+        {
+            return ColumnNames.ContainsKey(typeName);
+        }
+
         private static Func<object, string, object> GenerateGetValue(Type type)
         {
             var instance = Expression.Parameter(typeof(object), "instance");
@@ -542,6 +552,15 @@ namespace DataVeryLite.Core
         public static Action<object, string, object> GetSetDelegate(string typeName)
         {
             return SetDelegates[typeName];
+        }
+
+        public static void SetDelegate(Type type)
+        {
+            if (type == null)
+            {
+                return;
+            }
+            SetDelegates.Add(type.FullName, GenerateSetValue(type));
         }
         public static Dictionary<string, SqlHelper> GetSqlHelpers()
         {

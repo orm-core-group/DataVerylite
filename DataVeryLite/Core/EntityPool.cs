@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using DataVeryLite.Bys;
 using DataVeryLite.Exceptions;
@@ -136,7 +137,23 @@ namespace DataVeryLite.Core
 
                 Type type = typeof(T);
                 var typeName = type.FullName;
-                var infos = IntrospectionManager.GetColumns(typeName);
+                Dictionary<string, string> infos = null;
+
+                if (IntrospectionManager.IsExistsColumnName(typeName))
+                {
+                    infos = IntrospectionManager.GetColumns(typeName);
+                }
+                else
+                {
+                    infos = new Dictionary<string, string>();
+                    var fields =  type.GetProperties(BindingFlags.Public|BindingFlags.Instance|BindingFlags.SetProperty|BindingFlags.GetProperty);
+                    foreach (var fieldInfo in fields)
+                    {
+                        infos.Add(fieldInfo.Name, fieldInfo.Name);
+                    }
+                    IntrospectionManager.SetColumns(typeName, infos);
+                    IntrospectionManager.SetDelegate(type);
+                }
                 DbDataReader dr = null;
                 if (trans == null)
                 {
