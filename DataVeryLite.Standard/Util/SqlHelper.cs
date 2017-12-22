@@ -935,6 +935,7 @@ namespace DataVeryLite.Util
             }
         }
         #endregion
+        #if NET461
         ///<summary>
         /// Create new assembly
         ///</summary>
@@ -964,6 +965,7 @@ namespace DataVeryLite.Util
             Assembly assembly = result.CompiledAssembly;
             return assembly;
         }
+        #endif
         //Concat property
         [Obsolete]
         private static string propertyString(string propertyName)
