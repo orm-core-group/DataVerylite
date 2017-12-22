@@ -935,7 +935,7 @@ namespace DataVeryLite.Util
             }
         }
         #endregion
-        #if NET461
+        #if NET40
         ///<summary>
         /// Create new assembly
         ///</summary>
