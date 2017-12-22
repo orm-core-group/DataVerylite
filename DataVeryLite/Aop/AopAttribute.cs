@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET40
+
+using System;
 using System.Runtime.Remoting.Proxies;
 
 namespace DataVeryLite.Aop
@@ -12,3 +14,5 @@ namespace DataVeryLite.Aop
         }
     }
 }
+
+#endif

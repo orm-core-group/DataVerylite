@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET40
+
+using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
 using System.IO;
@@ -734,3 +736,5 @@ namespace DataVeryLite.Providers
         }
     }
 }
+
+#endif

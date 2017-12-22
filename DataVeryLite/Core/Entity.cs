@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
-using DataVeryLite.Aop;
 using DataVeryLite.Bys;
 using DataVeryLite.Exceptions;
 using DataVeryLite.Util;
