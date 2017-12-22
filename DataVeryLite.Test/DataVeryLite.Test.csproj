@@ -50,9 +50,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DataVeryLite">
-      <HintPath>Drivers\DataVeryLite.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -123,6 +120,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ConfigurationAccessorUsageExample.tt</DependentUpon>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataVeryLite\DataVeryLite.csproj">
+      <Project>{0ad6e40a-f35f-46f5-a9f4-79a4c9d57900}</Project>
+      <Name>DataVeryLite</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
