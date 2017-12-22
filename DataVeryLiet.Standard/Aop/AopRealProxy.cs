@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET461
+
+using System;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Activation;
@@ -63,3 +65,5 @@ namespace DataVeryLite.Aop
         }
     }
 }
+
+#endif

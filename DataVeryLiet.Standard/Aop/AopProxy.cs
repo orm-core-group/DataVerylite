@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET461
+
+using System;
 
 namespace DataVeryLite.Aop
 {
@@ -20,3 +22,5 @@ namespace DataVeryLite.Aop
         }
     }
 }
+
+#endif
