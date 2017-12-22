@@ -101,9 +101,9 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataVeryLite.Standard\DataVeryLite.Standard.csproj">
-      <Project>{84295a85-b204-4064-8e73-d6172fa9ee97}</Project>
-      <Name>DataVeryLite.Standard</Name>
+    <ProjectReference Include="..\DataVeryLite\DataVeryLite.csproj">
+      <Project>{f7307cc3-fea6-4208-a8af-d26c22502092}</Project>
+      <Name>DataVeryLite</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
