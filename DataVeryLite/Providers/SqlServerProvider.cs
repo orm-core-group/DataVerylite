@@ -35,7 +35,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName+" must have databse");
+                throw new Exception(ProviderName+" must have database;"+builder.ConnectionString);
             }
             return database.ToString();
         }
