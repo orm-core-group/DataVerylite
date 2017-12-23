@@ -6,6 +6,7 @@ using System.Data.Common;
 using System.Dynamic;
 using DataVeryLite.Core;
 using DataVeryLite.Util;
+using DataVeryLite.Exceptions;
 
 namespace DataVeryLite.Providers
 {
@@ -35,7 +36,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName + " must have database;"+builder.ConnectionString);
+                throw new Exception(ProviderName + " must have database;" + builder.ConnectionString);
             }
             return database.ToString().FirstLetterToUpper();
         }
@@ -44,7 +45,7 @@ namespace DataVeryLite.Providers
         public List<dynamic> GetTables(SqlHelper sqlHelper, string dataBaseName)
         {
             var list = new List<dynamic>();
-            var dr = sqlHelper.ExecuteReader("Select TABLE_NAME name from INFORMATION_SCHEMA.tables where TABLE_SCHEMA='" +dataBaseName + "'");
+            var dr = sqlHelper.ExecuteReader("Select TABLE_NAME name from INFORMATION_SCHEMA.tables where TABLE_SCHEMA='" + dataBaseName + "'");
             while (dr.Read())
             {
                 dynamic eo = new ExpandoObject();
@@ -157,7 +158,19 @@ namespace DataVeryLite.Providers
 
         public DbCommand GetCmd(Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("MySql.Data.MySqlClient.MySqlCommand");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("MySql.Data.MySqlClient.MySqlCommand");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("MySql.Data");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (Exception)
+            {
+                throw new DriverNotFoundException("MySql.Data");
+            }
         }
 
         public DbConnection GetConn(Assembly driverAssembly, string dbConnectionStr)
@@ -170,9 +183,9 @@ namespace DataVeryLite.Providers
 
         public System.Data.IDataAdapter GetAdapter(Assembly driverAssembly, DbCommand cmd)
         {
-           return (System.Data.IDataAdapter)
-                     driverAssembly.CreateInstance("MySql.Data.MySqlClient.MySqlDataAdapter", true, BindingFlags.Default, null,
-                                        new object[] { cmd }, null, null);
+            return (System.Data.IDataAdapter)
+                      driverAssembly.CreateInstance("MySql.Data.MySqlClient.MySqlDataAdapter", true, BindingFlags.Default, null,
+                                         new object[] { cmd }, null, null);
         }
         public string GetLastInsertIdSql(string tableName)
         {
@@ -265,7 +278,7 @@ namespace DataVeryLite.Providers
                     var lastColumnType = GetColumnTypeByMebmberType(memberType, columnType.ToLower(), length);
                     if (cols.Any(x => x.name.ToUpper() == columnName.ToUpper()))
                     {
-                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk,isAutoGrow,isRealAutoGrow))
+                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow, isRealAutoGrow))
                         {
                             continue;
                         }
@@ -300,7 +313,7 @@ namespace DataVeryLite.Providers
                         {
                             if (isRealPk)
                             {
-                                if (realAutoGrowName != null&&isRealAutoGrow)
+                                if (realAutoGrowName != null && isRealAutoGrow)
                                 {
                                     var dropautogrow = string.Format("alter table `{0}` change `{1}` `{1}`  {2} not null", tableName, realAutoGrowName, lastColumnType);
                                     sqlhelper.ExecuteNonQuery(dropautogrow);
@@ -475,7 +488,7 @@ namespace DataVeryLite.Providers
             };
 
         private bool IsNeedModiy(IEnumerable<dynamic> cols, Type memberType, string columnName, string columnType,
-            int length, bool isNullAble, bool isPk, bool isRealPk,bool isAutoGrow,bool isRealAutoGrow)
+            int length, bool isNullAble, bool isPk, bool isRealPk, bool isAutoGrow, bool isRealAutoGrow)
         {
             if (length == 0) length = 50;
 
@@ -484,7 +497,7 @@ namespace DataVeryLite.Providers
                 return true;
             }
 
-            if (isPk&&isAutoGrow != isRealAutoGrow)
+            if (isPk && isAutoGrow != isRealAutoGrow)
             {
                 return true;
             }

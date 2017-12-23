@@ -11,6 +11,7 @@ using System.Dynamic;
 using System.Data.Common;
 using DataVeryLite.Core;
 using DataVeryLite.Util;
+using DataVeryLite.Exceptions;
 
 namespace DataVeryLite.Providers
 {
@@ -183,7 +184,15 @@ namespace DataVeryLite.Providers
 
         public DbCommand GetCmd(Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("System.Data.OleDb.OleDbCommand");
+            try{
+                var cmd = driverAssembly.CreateInstance("System.Data.OleDb.OleDbCommand");
+                if(cmd == null){
+                    throw new DriverNotFoundException("System.Data.OleDb");
+                }
+                return (DbCommand)cmd;
+            }catch(Exception){
+                throw new DriverNotFoundException("System.Data.OleDb");
+            }
         }
 
         public DbConnection GetConn(Assembly driverAssembly, string dbConnectionStr)

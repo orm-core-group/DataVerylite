@@ -7,11 +7,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using DataVeryLite.Core;
+using DataVeryLite.Exceptions;
 using DataVeryLite.Util;
 
 namespace DataVeryLite.Providers
 {
-    class OracleProvider:IProvider
+    class OracleProvider : IProvider
     {
         public string ProviderName
         {
@@ -44,7 +45,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName + " must have database;"+builder.ConnectionString);
+                throw new Exception(ProviderName + " must have database;" + builder.ConnectionString);
             }
             return database.ToString().FirstLetterToUpper();
         }
@@ -118,7 +119,7 @@ namespace DataVeryLite.Providers
                     {
                         type = "string";
                     }
-                    else if (type == "float" || type == "integer"||type=="number")
+                    else if (type == "float" || type == "integer" || type == "number")
                     {
                         type = "decimal";
                     }
@@ -126,7 +127,7 @@ namespace DataVeryLite.Providers
                     {
                         type = "int";
                     }
-                    else if (type == "date"||type == "timestamp")
+                    else if (type == "date" || type == "timestamp")
                     {
                         type = "DateTime";
                     }
@@ -166,13 +167,25 @@ namespace DataVeryLite.Providers
 
         public object GetPrimaryKey(Util.SqlHelper sqlHelper, string dataBaseName, string tableName)
         {
-            object pk = sqlHelper.ExecuteScalar("select column_name from user_cons_columns where constraint_name=(select constraint_name from user_constraints where upper(table_name)=upper('"+tableName+"') and constraint_type='P')");
+            object pk = sqlHelper.ExecuteScalar("select column_name from user_cons_columns where constraint_name=(select constraint_name from user_constraints where upper(table_name)=upper('" + tableName + "') and constraint_type='P')");
             return pk == null ? null : pk.ToString().FirstLetterToUpper();
         }
 
         public System.Data.Common.DbCommand GetCmd(System.Reflection.Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("Oracle.ManagedDataAccess.Client.OracleCommand");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("Oracle.ManagedDataAccess.Client.OracleCommand");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("Oracle.ManagedDataAccess");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (Exception)
+            {
+                throw new DriverNotFoundException("Oracle.ManagedDataAccess");
+            }
         }
 
         public System.Data.Common.DbConnection GetConn(System.Reflection.Assembly driverAssembly, string dbConnectionStr)
@@ -284,7 +297,7 @@ namespace DataVeryLite.Providers
                     var lastColumnType = GetColumnTypeByMebmberType(memberType, columnType.ToLower(), length);
                     if (cols.Any(x => x.name.ToUpper() == columnName.ToUpper()))
                     {
-                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow,isRealAutoGrow))
+                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow, isRealAutoGrow))
                         {
                             continue;
                         }
@@ -303,7 +316,7 @@ namespace DataVeryLite.Providers
                         {
                             var alterSql = string.Format("alter table \"{0}\" modify(\"{1}\" {2})", tableName, columnName, lastColumnType);
                             sqlhelper.ExecuteNonQuery(alterSql);
-                       
+
                             alterSql = string.Format("alter table \"{0}\" add constraint \"{1}\" primary key(\"{2}\")", tableName, "pk_" + tableName + "_" + columnName, columnName);
                             sqlhelper.ExecuteNonQuery(alterSql);
                         }
@@ -314,7 +327,7 @@ namespace DataVeryLite.Providers
 
                             var alterSql = string.Format("alter table \"{0}\" modify(\"{1}\" {2})", tableName, columnName, lastColumnType);
                             sqlhelper.ExecuteNonQuery(alterSql);
-                            if (!isPk&&isNullableChange)
+                            if (!isPk && isNullableChange)
                             {
                                 alterSql = string.Format("alter table \"{0}\" modify(\"{1}\" {2})", tableName, columnName, nullAbleSql);
                                 sqlhelper.ExecuteNonQuery(alterSql);
@@ -323,7 +336,7 @@ namespace DataVeryLite.Providers
 
                         if (isAutoGrow != isRealAutoGrow)
                         {
-                            var getconstraint =string.Format(
+                            var getconstraint = string.Format(
                                     "select sequence_name,increment_by,last_number from user_sequences where upper(sequence_name)=upper('{0}')",
                                     "SEQ_" + tableName);
                             var constraints = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(getconstraint));
@@ -334,7 +347,7 @@ namespace DataVeryLite.Providers
                             }
                             var gettriggers = string.Format("select trigger_name from user_triggers where table_name='{0}' and trigger_name='{1}'", tableName, "TRIGGER_" + tableName + "_" + columnName);
                             var triggers = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(gettriggers));
-                            if (isAutoGrow &&!triggers.Any())
+                            if (isAutoGrow && !triggers.Any())
                             {
                                 var createtriggers = string.Format("create or replace trigger \"TRIGGER_{0}_{1}\" before insert on \"{0}\" for each row " +
                                                                    "declare newid number(18,0);" +
@@ -346,7 +359,7 @@ namespace DataVeryLite.Providers
                             }
                             else if (!isAutoGrow && triggers.Any())
                             {
-                                var createtriggers = string.Format("drop trigger \"TRIGGER_{0}_{1}\" ", tableName,columnName);
+                                var createtriggers = string.Format("drop trigger \"TRIGGER_{0}_{1}\" ", tableName, columnName);
                                 sqlhelper.ExecuteNonQuery(createtriggers);
                             }
 
@@ -360,7 +373,7 @@ namespace DataVeryLite.Providers
                             var constraints = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(getconstraint));
                             foreach (var constraint in constraints)
                             {
-                                var dropconstraint = "alter table \"" + tableName + "\" drop constraint \"" + constraint.NAME+"\"";
+                                var dropconstraint = "alter table \"" + tableName + "\" drop constraint \"" + constraint.NAME + "\"";
                                 sqlhelper.ExecuteNonQuery(dropconstraint);
                             }
                         }
@@ -494,7 +507,7 @@ namespace DataVeryLite.Providers
             };
 
         private bool IsNeedModiy(IEnumerable<dynamic> cols, Type memberType, string columnName, string columnType,
-            int length, bool isNullAble, bool isPk, bool isRealPk ,bool isAutoGrow,bool isRealAutoGrow)
+            int length, bool isNullAble, bool isPk, bool isRealPk, bool isAutoGrow, bool isRealAutoGrow)
         {
             if (length == 0) length = 50;
 
@@ -540,7 +553,7 @@ namespace DataVeryLite.Providers
 
         private bool IsRealPkInDb(SqlHelper sqlhelper, string tableName, string columnName)
         {
-            var pkName = Warp.ShieldLogSql(() =>GetPrimaryKey(sqlhelper, "", tableName));
+            var pkName = Warp.ShieldLogSql(() => GetPrimaryKey(sqlhelper, "", tableName));
             if (pkName == null)
             {
                 return false;
@@ -561,7 +574,7 @@ namespace DataVeryLite.Providers
             return tables.Any(x => x.name.ToUpper() == tableName.ToUpper());
         }
 
-        public void CreateTable(SqlHelper sqlhelper,string className, string tableName)
+        public void CreateTable(SqlHelper sqlhelper, string className, string tableName)
         {
             var columns = IntrospectionManager.GetColumns(className);
             var columnsArr = columns.Select(x =>
@@ -584,7 +597,7 @@ namespace DataVeryLite.Providers
             var columnsSql = string.Join(",", columnsArr);
             var createTable = "create table \"" + tableName + "\"(" + columnsSql + ")";
             sqlhelper.ExecuteNonQuery(createTable);
-           
+
             var autoGrowName = IntrospectionManager.GetAutoGrowColumnName(className);
             if (!string.IsNullOrWhiteSpace(autoGrowName))
             {

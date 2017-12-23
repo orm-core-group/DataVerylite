@@ -6,10 +6,11 @@ using System.Data.Common;
 using System.Dynamic;
 using DataVeryLite.Core;
 using DataVeryLite.Util;
+using DataVeryLite.Exceptions;
 
 namespace DataVeryLite.Providers
 {
-    class SqlServerProvider:IProvider
+    class SqlServerProvider : IProvider
     {
         public string ProviderName
         {
@@ -35,7 +36,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName+" must have database;"+builder.ConnectionString);
+                throw new Exception(ProviderName + " must have database;" + builder.ConnectionString);
             }
             return database.ToString();
         }
@@ -43,17 +44,17 @@ namespace DataVeryLite.Providers
 
         public List<dynamic> GetTables(SqlHelper sqlHelper, string dataBaseName)
         {
-                return
-                    sqlHelper.ExecuteDynamic("select Name name from sysobjects where xtype='u'");
+            return
+                sqlHelper.ExecuteDynamic("select Name name from sysobjects where xtype='u'");
         }
 
         public List<dynamic> GetColumns(SqlHelper sqlHelper, string dataBaseName, string tableName)
         {
-                return sqlHelper.ExecuteDynamic("select name name,data_type type,length length,is_nullable isnullable " +
-                                                " from syscolumns " +
-                                                "inner join information_schema.columns " +
-                                                "on(name=column_name and table_name='" + tableName + "') " +
-                                                "where id=object_id('" + tableName + "')");
+            return sqlHelper.ExecuteDynamic("select name name,data_type type,length length,is_nullable isnullable " +
+                                            " from syscolumns " +
+                                            "inner join information_schema.columns " +
+                                            "on(name=column_name and table_name='" + tableName + "') " +
+                                            "where id=object_id('" + tableName + "')");
         }
 
         private List<dynamic> _tableInfos = null;
@@ -141,7 +142,19 @@ namespace DataVeryLite.Providers
 
         public DbCommand GetCmd(Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("System.Data.SqlClient.SqlCommand");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("System.Data.SqlClient.SqlCommand");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("System.Data.SqlClient");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (System.Exception)
+            {
+                throw new DriverNotFoundException("System.Data.SqlClient");
+            }
         }
 
         public DbConnection GetConn(Assembly driverAssembly, string dbConnectionStr)
@@ -183,14 +196,14 @@ namespace DataVeryLite.Providers
                 sql =
                         string.Format(
                             "select * from (select row_number() over(order by {3}) as row_number,* from {0}) a where row_number>{1} and row_number < {2} order by {3}",
-                            _left + talbeName + _right, (page - 1) * pageSize, page * pageSize+1, _left + idColumnName + _right);
+                            _left + talbeName + _right, (page - 1) * pageSize, page * pageSize + 1, _left + idColumnName + _right);
             }
             else
             {
                 sql =
                         string.Format(
                             "select * from (select row_number() over(order by {3} desc) as row_number,* from {0}) a where row_number>{1} and row_number < {2} order by {3} desc",
-                            _left + talbeName + _right, (page - 1) * pageSize, page * pageSize+1, _left + idColumnName + _right);
+                            _left + talbeName + _right, (page - 1) * pageSize, page * pageSize + 1, _left + idColumnName + _right);
             }
             return sql;
         }
@@ -225,7 +238,7 @@ namespace DataVeryLite.Providers
             get { return ""; }
         }
 
-        public void SyncDbInfo(string key,string className,string tableName)
+        public void SyncDbInfo(string key, string className, string tableName)
         {
             var sqlhelper = IntrospectionManager.GetSqlHelperByKey(key);
 
@@ -269,21 +282,21 @@ namespace DataVeryLite.Providers
 
                     var autoGrowSql = isAutoGrow ? "identity(1,1)" : "";
                     var nullAbleSql = isNullAble ? " null" : " not null";
-                    nullAbleSql = isPk ||isRealAutoGrow ? " not null" : nullAbleSql;
+                    nullAbleSql = isPk || isRealAutoGrow ? " not null" : nullAbleSql;
                     var lastColumnType = GetColumnTypeByMebmberType(memberType, columnType.ToLower(), length);
                     if (cols.Any(x => x.name.ToUpper() == columnName.ToUpper()))
                     {
-                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk,isAutoGrow,isRealAutoGrow))
+                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow, isRealAutoGrow))
                         {
                             continue;
                         }
                         if (isPk != isRealPk)
                         {
-                            var getconstraint = string.Format("select constraint_name name from information_schema.key_column_usage where table_name='{0}'",tableName);
+                            var getconstraint = string.Format("select constraint_name name from information_schema.key_column_usage where table_name='{0}'", tableName);
                             var constraints = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(getconstraint));
                             foreach (var constraint in constraints)
                             {
-                                var dropconstraint = "alter table [" + tableName + "] drop constraint [" + constraint.name+"]";
+                                var dropconstraint = "alter table [" + tableName + "] drop constraint [" + constraint.name + "]";
                                 sqlhelper.ExecuteNonQuery(dropconstraint);
                             }
                         }
@@ -309,10 +322,10 @@ namespace DataVeryLite.Providers
                                                               "on so.id = sc.constid " +
                                                               "where object_name(so.parent_obj) = '{0}'" +
                                                               " and so.xtype = 'PK'", tableName);
-                            var constraints = Warp.ShieldLogSql(() =>sqlhelper.ExecuteDynamic(getconstraint));
+                            var constraints = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(getconstraint));
                             foreach (var constraint in constraints)
                             {
-                                var dropconstraint = "alter table [" + tableName + "] drop constraint [" + constraint.name+"]";
+                                var dropconstraint = "alter table [" + tableName + "] drop constraint [" + constraint.name + "]";
                                 sqlhelper.ExecuteNonQuery(dropconstraint);
                             }
                         }
@@ -323,9 +336,9 @@ namespace DataVeryLite.Providers
                             alterSql = string.Format("alter table [{0}] add constraint [{1}] primary key([{2}])", tableName, "pk_" + tableName + "_" + columnName, columnName);
                             sqlhelper.ExecuteNonQuery(alterSql);
                         }
-                           
+
                     }
-                    
+
                     #endregion
                 }
                 #endregion
@@ -356,39 +369,39 @@ namespace DataVeryLite.Providers
                 }
             }
 
-            if (type == typeof (int) || type == typeof (uint))
+            if (type == typeof(int) || type == typeof(uint))
             {
                 return "int";
             }
-            else if (type == typeof (long) || type == typeof (ulong))
+            else if (type == typeof(long) || type == typeof(ulong))
             {
                 return "bigint";
             }
-            else if (type == typeof (short) || type == typeof (ushort))
+            else if (type == typeof(short) || type == typeof(ushort))
             {
                 return "smallint";
             }
-            else if (type == typeof (decimal))
+            else if (type == typeof(decimal))
             {
                 return "decimal";
             }
-            else if (type == typeof (double))
+            else if (type == typeof(double))
             {
                 return "float";
             }
-            else if (type == typeof (float))
+            else if (type == typeof(float))
             {
                 return "real";
             }
-            else if (type == typeof (bool))
+            else if (type == typeof(bool))
             {
                 return "bit";
             }
-            else if (type == typeof (byte))
+            else if (type == typeof(byte))
             {
                 return "tinyint";
             }
-            else if (type == typeof (byte[]))
+            else if (type == typeof(byte[]))
             {
                 return "varbinary";
             }
@@ -396,7 +409,7 @@ namespace DataVeryLite.Providers
             {
                 return "int";
             }
-            else if (type == typeof (DateTime))
+            else if (type == typeof(DateTime))
             {
                 return "datetime";
             }
@@ -404,11 +417,11 @@ namespace DataVeryLite.Providers
             {
                 return "uniqueidentifier";
             }
-            else if (type == typeof (string) && length == int.MaxValue)
+            else if (type == typeof(string) && length == int.MaxValue)
             {
                 return "text";
             }
-            else if (type == typeof (string))
+            else if (type == typeof(string))
             {
                 return "varchar(" + length + ")";
             }
@@ -444,7 +457,7 @@ namespace DataVeryLite.Providers
             };
 
         private bool IsNeedModiy(IEnumerable<dynamic> cols, Type memberType, string columnName, string columnType,
-            int length, bool isNullAble, bool isPk, bool isRealPk,bool isAutoGrow,bool isRealAutoGrow)
+            int length, bool isNullAble, bool isPk, bool isRealPk, bool isAutoGrow, bool isRealAutoGrow)
         {
             if (length == 0) length = 50;
 
@@ -455,7 +468,7 @@ namespace DataVeryLite.Providers
 
             if (isPk || isAutoGrow)
             {
-                if ( _filterType.Contains(columnType.ToLower()))
+                if (_filterType.Contains(columnType.ToLower()))
                 {
                     return !cols.Any(x => x.name.ToUpper() == columnName.ToUpper() && x.type == columnType.Split('(')[0]);
                 }
@@ -476,7 +489,7 @@ namespace DataVeryLite.Providers
                 }
                 else if (columnType.Split('(')[0] == "nvarchar" || columnType.Split('(')[0] == "nchar")
                 {
-                    return !cols.Any(x => x.name.ToUpper() == columnName.ToUpper() && x.type == columnType.Split('(')[0] && x.length == 2*length && x.isnullable == isNullAble.ToYesNo());
+                    return !cols.Any(x => x.name.ToUpper() == columnName.ToUpper() && x.type == columnType.Split('(')[0] && x.length == 2 * length && x.isnullable == isNullAble.ToYesNo());
                 }
                 else
                 {
@@ -489,7 +502,7 @@ namespace DataVeryLite.Providers
         {
             var getconstraint = string.Format("select table_name,column_name from information_schema.key_column_usage where table_name='{0}' and column_name='{1}'",
                                               tableName, columnName);
-            var constraints = Warp.ShieldLogSql(() =>sqlhelper.ExecuteDynamic(getconstraint));
+            var constraints = Warp.ShieldLogSql(() => sqlhelper.ExecuteDynamic(getconstraint));
             return constraints.Any();
         }
 
@@ -506,7 +519,7 @@ namespace DataVeryLite.Providers
             return tables.Any(x => x.name.ToUpper() == tableName.ToUpper());
         }
 
-        public void CreateTable(SqlHelper sqlhelper,DbTransaction tran, string className, string tableName)
+        public void CreateTable(SqlHelper sqlhelper, DbTransaction tran, string className, string tableName)
         {
             var columns = IntrospectionManager.GetColumns(className);
             var columnsArr = columns.Select(x =>
@@ -562,7 +575,7 @@ namespace DataVeryLite.Providers
                     sql += "set identity_insert [" + newTableName + "] off;";
                 }
                 sqlhelper.ExecuteNonQuery(tran, sql);
-                sqlhelper.ExecuteNonQuery(tran, "drop table [" + tableName+"]");
+                sqlhelper.ExecuteNonQuery(tran, "drop table [" + tableName + "]");
                 sqlhelper.ExecuteNonQuery(tran, "sp_rename '" + newTableName + "','" + tableName + "'");
                 tran.Commit();
             }

@@ -7,17 +7,18 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using DataVeryLite.Core;
+using DataVeryLite.Exceptions;
 using DataVeryLite.Util;
 
 namespace DataVeryLite.Providers
 {
-    class Db2Provider:IProvider
+    class Db2Provider : IProvider
     {
         public string ProviderName
         {
-            get { return  DataBaseNames.Db2; }
+            get { return DataBaseNames.Db2; }
         }
-        
+
         public System.Reflection.Assembly GetAssembly(string path)
         {
             if (Environment.Is64BitProcess)
@@ -31,7 +32,7 @@ namespace DataVeryLite.Providers
         }
         private string getUser(string connStr)
         {
-            var builder=new DbConnectionStringBuilder();
+            var builder = new DbConnectionStringBuilder();
             builder.ConnectionString = connStr;
             object user = "";
             builder.TryGetValue("User ID", out user);
@@ -55,7 +56,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName + " must have database;"+builder.ConnectionString);
+                throw new Exception(ProviderName + " must have database;" + builder.ConnectionString);
             }
             return database.ToString().FirstLetterToUpper();
         }
@@ -138,7 +139,7 @@ namespace DataVeryLite.Providers
                     {
                         type = "DateTime";
                     }
-                    else if (type=="xml"||type == "varbinary" || type == "binary" || type == "char for bit data"||type=="long varchar for bit data"||type=="blob"||type=="rowid")
+                    else if (type == "xml" || type == "varbinary" || type == "binary" || type == "char for bit data" || type == "long varchar for bit data" || type == "blob" || type == "rowid")
                     {
                         type = "byte[]";
                     }
@@ -170,14 +171,26 @@ namespace DataVeryLite.Providers
 
         public object GetPrimaryKey(Util.SqlHelper sqlHelper, string dataBaseName, string tableName)
         {
-            object pk=sqlHelper.ExecuteScalar("select name from sysibm.syscolumns where upper(tbname) = upper('" + tableName + "')  and keyseq > 0  order by keyseq asc");
-            return pk==null?null:pk.ToString().FirstLetterToUpper();
+            object pk = sqlHelper.ExecuteScalar("select name from sysibm.syscolumns where upper(tbname) = upper('" + tableName + "')  and keyseq > 0  order by keyseq asc");
+            return pk == null ? null : pk.ToString().FirstLetterToUpper();
 
         }
 
         public System.Data.Common.DbCommand GetCmd(System.Reflection.Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("IBM.Data.DB2.DB2Command");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("IBM.Data.DB2.DB2Command");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("IBM.Data.DB2");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (Exception)
+            {
+                throw new DriverNotFoundException("IBM.Data.DB2");
+            }
         }
 
         public System.Data.Common.DbConnection GetConn(System.Reflection.Assembly driverAssembly, string dbConnectionStr)
@@ -222,7 +235,7 @@ namespace DataVeryLite.Providers
                     string.Format(
                         "select * from (select {0}.*,rownumber() over(order by {1} asc ) as rowid  from {0} ) as a where a.rowid >= {2} and a.rowid < {3}",
                         _left + talbeName + _right,
-                        _left + idColumnName + _right, (page - 1)*pageSize + 1, page*pageSize + 1);
+                        _left + idColumnName + _right, (page - 1) * pageSize + 1, page * pageSize + 1);
             }
             else
             {
@@ -230,7 +243,7 @@ namespace DataVeryLite.Providers
                     string.Format(
                         "select * from (select {0}.*,rownumber() over(order by {1} desc ) as rowid  from {0} ) as a where a.rowid >= {2} and a.rowid < {3} order by {1} desc",
                         _left + talbeName + _right,
-                        _left + idColumnName + _right, (page - 1)*pageSize + 1, page*pageSize + 1);
+                        _left + idColumnName + _right, (page - 1) * pageSize + 1, page * pageSize + 1);
             }
             return sql;
         }
@@ -271,13 +284,13 @@ namespace DataVeryLite.Providers
 
         public void SyncDbInfo(string key, string className, string tableName)
         {
-           // throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
 
         public string GetColumnTypeByMebmberType(Type type, string columnType, int length)
         {
-          //  throw new NotImplementedException();
+            //  throw new NotImplementedException();
             return "";
         }
     }

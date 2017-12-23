@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using DataVeryLite.Core;
+using DataVeryLite.Exceptions;
 using DataVeryLite.Util;
 
 namespace DataVeryLite.Providers
@@ -33,7 +34,7 @@ namespace DataVeryLite.Providers
             }
             if (database == null || string.IsNullOrEmpty(database.ToString()))
             {
-                throw new Exception(ProviderName + " must have database;"+builder.ConnectionString);
+                throw new Exception(ProviderName + " must have database;" + builder.ConnectionString);
             }
             return database.ToString();
         }
@@ -58,15 +59,15 @@ namespace DataVeryLite.Providers
             {
                 _tableInfos = new List<dynamic>();
                 DbDataReader dr =
-                    sqlHelper.ExecuteReader(string.Format("SELECT format_type(a.atttypid,a.atttypmod) as data_type,a.attname as column_name from pg_class as c,pg_attribute as a where c.relname = '{0}' and a.attrelid = c.oid and a.attnum>0 ",tableName));
+                    sqlHelper.ExecuteReader(string.Format("SELECT format_type(a.atttypid,a.atttypmod) as data_type,a.attname as column_name from pg_class as c,pg_attribute as a where c.relname = '{0}' and a.attrelid = c.oid and a.attnum>0 ", tableName));
                 while (dr.Read())
                 {
                     string type = dr["data_type"].ToString().ToLower();
 
                     #region typedef
                     //cidr,inet =ipv4 or ipv6 / interval timespan
-                    if (type == "macaddr" || type == "interval" || type == "inet" || type == "cidr" 
-                        || type == "bit" || type == "bit varying" || type == "character" 
+                    if (type == "macaddr" || type == "interval" || type == "inet" || type == "cidr"
+                        || type == "bit" || type == "bit varying" || type == "character"
                         || type == "text" || type == "character varying")
                     {
                         type = "string";
@@ -137,12 +138,24 @@ namespace DataVeryLite.Providers
         {
             return
                 sqlHelper.ExecuteScalar(string.Format(
-                    "select pg_attribute.attname as name from pg_constraint  inner join pg_class on pg_constraint.conrelid = pg_class.oid inner join pg_attribute on pg_attribute.attrelid = pg_class.oid and  pg_attribute.attnum = pg_constraint.conkey[1] inner join pg_type on pg_type.oid = pg_attribute.atttypid where pg_class.relname = '{0}' and pg_constraint.contype='p'",tableName));
+                    "select pg_attribute.attname as name from pg_constraint  inner join pg_class on pg_constraint.conrelid = pg_class.oid inner join pg_attribute on pg_attribute.attrelid = pg_class.oid and  pg_attribute.attnum = pg_constraint.conkey[1] inner join pg_type on pg_type.oid = pg_attribute.atttypid where pg_class.relname = '{0}' and pg_constraint.contype='p'", tableName));
         }
 
         public System.Data.Common.DbCommand GetCmd(System.Reflection.Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("Npgsql.NpgsqlCommand");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("Npgsql.NpgsqlCommand");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("Npgsql.NpgsqlCommand");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (Exception)
+            {
+                throw new DriverNotFoundException("Npgsql.NpgsqlCommand");
+            }
         }
 
         public System.Data.Common.DbConnection GetConn(System.Reflection.Assembly driverAssembly, string dbConnectionStr)
@@ -250,13 +263,13 @@ namespace DataVeryLite.Providers
                     var lastColumnType = GetColumnTypeByMebmberType(memberType, columnType.ToLower(), length);
                     if (cols.Any(x => x.name.ToUpper() == columnName.ToUpper()))
                     {
-                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow,isRealAutoGrow))
+                        if (!IsNeedModiy(cols, memberType, columnName, lastColumnType, length, isNullAble, isPk, isRealPk, isAutoGrow, isRealAutoGrow))
                         {
                             continue;
                         }
                         needRebuild = true;
                         break;
-                        
+
                     }
                     else
                     {
@@ -384,7 +397,7 @@ namespace DataVeryLite.Providers
             };
 
         private bool IsNeedModiy(IEnumerable<dynamic> cols, Type memberType, string columnName, string columnType,
-            int length, bool isNullAble, bool isPk, bool isRealPk,bool isAutoGrow,bool isRealAutoGrow)
+            int length, bool isNullAble, bool isPk, bool isRealPk, bool isAutoGrow, bool isRealAutoGrow)
         {
             if (length == 0) length = 50;
 
@@ -402,7 +415,7 @@ namespace DataVeryLite.Providers
             {
                 if (_filterType.Contains(columnType.ToLower()))
                 {
-                    return !cols.Any(x => x.name.ToUpper() == columnName.ToUpper() && (x.type == "character varying" ? "varchar" : x.type)== columnType.Split('(')[0]);
+                    return !cols.Any(x => x.name.ToUpper() == columnName.ToUpper() && (x.type == "character varying" ? "varchar" : x.type) == columnType.Split('(')[0]);
                 }
                 else
                 {
@@ -424,7 +437,7 @@ namespace DataVeryLite.Providers
 
         private bool IsRealPkInDb(SqlHelper sqlhelper, string tableName, string columnName)
         {
-            var pkName = Warp.ShieldLogSql(() =>GetPrimaryKey(sqlhelper, "", tableName));
+            var pkName = Warp.ShieldLogSql(() => GetPrimaryKey(sqlhelper, "", tableName));
             if (pkName == null) return false;
             return columnName == pkName.ToString();
         }
@@ -471,7 +484,7 @@ namespace DataVeryLite.Providers
                 var nullAbleSql = isNullAble ? "" : "not null";
                 nullAbleSql = isPk || isAutoGrow ? " not null" : nullAbleSql;
                 var lastColumnType = GetColumnTypeByMebmberType(memberType, columnType.ToLower(), length);
-                if (memberType == typeof (long) || memberType == typeof (ulong))
+                if (memberType == typeof(long) || memberType == typeof(ulong))
                 {
                     lastColumnType = isAutoGrow ? "bigserial" : lastColumnType;
                 }
@@ -513,7 +526,7 @@ namespace DataVeryLite.Providers
                 var columnsArr = string.Join(",", cols.Select(x => "\"" + x.name + "\""));
                 sqlhelper.ExecuteNonQuery(tran, string.Format("insert into \"{0}\"({2}) select {2} from \"{1}\"", newTableName, tableName, columnsArr));
                 sqlhelper.ExecuteNonQuery(tran, "drop table \"" + tableName + "\"");
-                sqlhelper.ExecuteNonQuery(tran,string.Format("alter table \"{0}\" rename to \"{1}\"", newTableName, tableName));
+                sqlhelper.ExecuteNonQuery(tran, string.Format("alter table \"{0}\" rename to \"{1}\"", newTableName, tableName));
                 tran.Commit();
             }
             catch (Exception ex)
@@ -527,7 +540,7 @@ namespace DataVeryLite.Providers
             }
 
             //var pkName = Warp.ShieldLogSql(() => GetPrimaryKey(sqlhelper, "", tableName));
-            var autoGrowName= IntrospectionManager.GetAutoGrowColumnName(className);
+            var autoGrowName = IntrospectionManager.GetAutoGrowColumnName(className);
             if (!string.IsNullOrWhiteSpace(autoGrowName))
             {
                 sqlhelper.ExecuteNonQuery(string.Format("alter sequence \"{0}_{1}_seq\" rename to \"{2}_{1}_seq\"", newTableName, autoGrowName, tableName));

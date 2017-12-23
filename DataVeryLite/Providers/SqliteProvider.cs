@@ -7,10 +7,11 @@ using System.Dynamic;
 using System.Data.Common;
 using DataVeryLite.Core;
 using DataVeryLite.Util;
+using DataVeryLite.Exceptions;
 
 namespace DataVeryLite.Providers
 {
-    class SqliteProvider:IProvider
+    class SqliteProvider : IProvider
     {
         public string ProviderName
         {
@@ -128,7 +129,19 @@ namespace DataVeryLite.Providers
 
         public System.Data.Common.DbCommand GetCmd(Assembly driverAssembly)
         {
-            return (DbCommand)driverAssembly.CreateInstance("System.Data.SQLite.SQLiteCommand");
+            try
+            {
+                var cmd = driverAssembly.CreateInstance("System.Data.SQLite.SQLiteCommand");
+                if (cmd == null)
+                {
+                    throw new DriverNotFoundException("System.Data.SQLite");
+                }
+                return (DbCommand)cmd;
+            }
+            catch (Exception)
+            {
+                throw new DriverNotFoundException("System.Data.SQLite");
+            }
         }
 
         public System.Data.Common.DbConnection GetConn(Assembly driverAssembly, string dbConnectionStr)
@@ -255,7 +268,7 @@ namespace DataVeryLite.Providers
 
                         CreateTable(sqlhelper, tran, className, tableName);
 
-                        DropOldTable(sqlhelper, tran,className, tableName, oldName);
+                        DropOldTable(sqlhelper, tran, className, tableName, oldName);
 
                         tran.Commit();
                     }
@@ -380,9 +393,9 @@ namespace DataVeryLite.Providers
 
         private bool IsRealPkInDb(SqlHelper sqlhelper, string tableName, string columnName)
         {
-            var getconstraint = Warp.ShieldLogSql(() =>GetPrimaryKey(sqlhelper, "", tableName));
+            var getconstraint = Warp.ShieldLogSql(() => GetPrimaryKey(sqlhelper, "", tableName));
             if (getconstraint == null) return false;
-            return columnName.ToUpper()== getconstraint.ToString().ToUpper();
+            return columnName.ToUpper() == getconstraint.ToString().ToUpper();
         }
 
         private bool IsNeedAddTable(SqlHelper sqlhelper, string tableName)
@@ -391,7 +404,7 @@ namespace DataVeryLite.Providers
             return tables.Any(x => x.name.ToUpper() == tableName.ToUpper());
         }
 
-        public void CreateTable(SqlHelper sqlhelper,DbTransaction tran,string className,string tableName)
+        public void CreateTable(SqlHelper sqlhelper, DbTransaction tran, string className, string tableName)
         {
             var columns = IntrospectionManager.GetColumns(className);
 
@@ -426,16 +439,16 @@ namespace DataVeryLite.Providers
         public string RenameTable(SqlHelper sqlhelper, DbTransaction tran, string tableName)
         {
             string oldName = tableName + DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            sqlhelper.ExecuteNonQuery(tran , string.Format("alter table \"{0}\" rename to \"{1}\";", tableName, oldName));
+            sqlhelper.ExecuteNonQuery(tran, string.Format("alter table \"{0}\" rename to \"{1}\";", tableName, oldName));
             return oldName;
         }
 
-        public string DropOldTable(SqlHelper sqlHelper, DbTransaction tran,string className, string tableName, string oldTableName)
+        public string DropOldTable(SqlHelper sqlHelper, DbTransaction tran, string className, string tableName, string oldTableName)
         {
             var columns = IntrospectionManager.GetColumns(className);
             var columnsArr = string.Join(",", columns.Values.Select(x => "\"" + x + "\""));
-            sqlHelper.ExecuteNonQuery(tran , string.Format("insert into \"{0}\"({2})  select {2} from \"{1}\"", tableName, oldTableName,columnsArr));
-            sqlHelper.ExecuteNonQuery(tran , string.Format("drop table \"{0}\";", oldTableName));
+            sqlHelper.ExecuteNonQuery(tran, string.Format("insert into \"{0}\"({2})  select {2} from \"{1}\"", tableName, oldTableName, columnsArr));
+            sqlHelper.ExecuteNonQuery(tran, string.Format("drop table \"{0}\";", oldTableName));
             return "";
         }
     }
