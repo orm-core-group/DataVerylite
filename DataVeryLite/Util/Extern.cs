@@ -95,6 +95,18 @@ namespace DataVeryLite.Util
             }
         }
 
+        public static bool IsString(this Type value)
+        {
+            if (value == typeof(string))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static bool IsByteArrary(this Type value)
         {
             if (value == typeof(byte[]))

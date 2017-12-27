@@ -438,9 +438,21 @@ namespace DataVeryLite.Core
                 {
                     convert = Expression.Convert(newValue, propertyInfo.PropertyType);
                 }
-                var setValue = Expression.Assign(property, convert);
+
+
+                Expression right= Expression.Assign(property, convert);
+
+                if (propertyInfo.PropertyType.IsString())
+                {
+                    var dateTimeToString = Expression.Call(newValue, "ToString", null);
+                    var setDateTimeToString = Expression.Assign(property, dateTimeToString);
+                    var isDateTime = Expression.TypeIs(newValue, typeof(DateTime));
+                    right = Expression.IfThenElse(isDateTime, setDateTimeToString, right);
+                }
+             
+
                 var detDefault = Expression.Assign(property, Expression.Default(propertyInfo.PropertyType));
-                var ifThenElse = Expression.IfThenElse(Expression.Equal(Expression.Constant(null), newValue), detDefault, setValue);
+                var ifThenElse = Expression.IfThenElse(Expression.Equal(Expression.Constant(null), newValue), detDefault, right);
                 var propertyHash = Expression.Constant(propertyInfo.Name.GetHashCode(), typeof(int));
 
                 cases.Add(Expression.SwitchCase(ifThenElse, propertyHash));
@@ -448,7 +460,8 @@ namespace DataVeryLite.Core
             var switchEx = Expression.Switch(nameHash, null, cases.ToArray());
             var methodBody = Expression.Block(new[] { nameHash }, calHash, switchEx);
 
-            return Expression.Lambda<Action<object, string, object>>(methodBody, instance, memberName, newValue).Compile();
+            var lambda =  Expression.Lambda<Action<object, string, object>>(methodBody, instance, memberName, newValue);
+            return lambda.Compile();
         }
 
         public static string GetPrimaryMemberName(string typeName)
